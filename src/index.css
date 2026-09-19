@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  --font-gt-walsheim: 'GT Walsheim Pro', 'GT Walsheim', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --color-tillamook-navy: #001e60;
+  --color-tillamook-cream: #fcfae6;
+  --color-tillamook-cream-light: #fdfcee;
+  --color-tillamook-cream-dark: #f3eed0;
+  --color-tillamook-gold: #ffb81c;
+  --color-tillamook-orange: #e8590c;
+}
+
+html, body {
+  font-family: 'GT Walsheim Pro', 'GT Walsheim', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #001e60;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom vertical text style for the sign-up tab */
+.writing-mode-vertical {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+

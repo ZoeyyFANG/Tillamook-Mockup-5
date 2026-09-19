@@ -1,0 +1,8 @@
+{
+  "name": "Remix Remix Tillamook Cheese",
+  "description": "Recreation of the Tillamook website featuring cheese products, GT Walsheim typography, navigation bar, and hero section.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

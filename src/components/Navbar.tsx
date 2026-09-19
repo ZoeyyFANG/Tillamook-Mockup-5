@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Search, ArrowUpRight, Menu, X, Globe, Check } from 'lucide-react';
+import { Search, ArrowUpRight, Menu, X, Globe, Check, ShoppingBag } from 'lucide-react';
 import TillamookLogo from './TillamookLogo';
 import LanguageSelector from './LanguageSelector';
 import { useLanguage } from '../context/LanguageContext';
+import { useShop } from '../shop/ShopContext';
 
 interface NavbarProps {
   onOpenSearch: () => void;
@@ -13,6 +14,21 @@ interface NavbarProps {
 export default function Navbar({ onOpenSearch, onOpenWhereToBuy }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { t, language, setLanguage, languages } = useLanguage();
+  const { count } = useShop();
+
+  const Basket = ({ id }: { id: string }) => (
+    <a
+      id={id}
+      href="#/cart"
+      aria-label={`Koszyk (${count})`}
+      className="relative p-1.5 text-white hover:text-[#fcfae6] transition-colors flex items-center justify-center"
+    >
+      <ShoppingBag className="w-5 h-5 stroke-[2.2]" />
+      {count > 0 && (
+        <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-[#ffb81c] text-[#001e60] text-[10px] font-black flex items-center justify-center">{count}</span>
+      )}
+    </a>
+  );
 
   return (
     <header className="sticky top-0 z-40 w-full bg-[#001e60] text-white shadow-md font-['GT_Walsheim_Pro',_'GT_Walsheim',_sans-serif]">
@@ -37,6 +53,7 @@ export default function Navbar({ onOpenSearch, onOpenWhereToBuy }: NavbarProps) 
 
           <div className="flex items-center gap-1.5">
             <LanguageSelector compact />
+            <Basket id="nav-basket-btn-mobile" />
             <button
               onClick={onOpenSearch}
               className="p-2 text-white hover:text-[#fcfae6] transition-colors cursor-pointer"
@@ -52,7 +69,7 @@ export default function Navbar({ onOpenSearch, onOpenWhereToBuy }: NavbarProps) 
           
           {/* Left Navigation Items: Aligned toward center logo */}
           <div className="flex-1 flex items-center justify-end pr-6 lg:pr-10 xl:pr-12">
-            <nav className="flex items-center gap-6 lg:gap-8 xl:gap-10 text-[15px] lg:text-[16px] xl:text-[17px] font-normal tracking-tight text-white">
+            <nav className="flex items-center gap-5 lg:gap-8 xl:gap-10 text-[15px] lg:text-[16px] xl:text-[17px] font-normal tracking-tight text-white whitespace-nowrap">
               <a
                 id="nav-products-link"
                 href="#products-catalog"
@@ -93,7 +110,7 @@ export default function Navbar({ onOpenSearch, onOpenWhereToBuy }: NavbarProps) 
 
           {/* Right Navigation Items: Starting from center logo with search and language selector aligned neatly on the right */}
           <div className="flex-1 flex items-center justify-start pl-6 lg:pl-10 xl:pl-12">
-            <div className="flex items-center gap-5 lg:gap-7 xl:gap-9 text-[15px] lg:text-[16px] xl:text-[17px] font-normal tracking-tight text-white">
+            <div className="flex items-center gap-4 lg:gap-6 xl:gap-8 text-[15px] lg:text-[16px] xl:text-[17px] font-normal tracking-tight text-white whitespace-nowrap">
               <a
                 id="nav-visit-link"
                 href="#visit-creamery"
@@ -112,9 +129,7 @@ export default function Navbar({ onOpenSearch, onOpenWhereToBuy }: NavbarProps) 
 
               <a
                 id="nav-online-shop-link"
-                href="https://shop.tillamook.com"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#/shop"
                 className="inline-flex items-center gap-1 hover:text-[#fcfae6] transition-colors text-white font-normal"
               >
                 <span>{t.nav.onlineShop}</span>
@@ -130,6 +145,8 @@ export default function Navbar({ onOpenSearch, onOpenWhereToBuy }: NavbarProps) 
               >
                 <Search className="w-4.5 h-4.5 stroke-[2.2]" />
               </button>
+
+              <Basket id="nav-basket-btn" />
 
               {/* Integrated Language Selector Dropdown inside the Navigation Bar */}
               <LanguageSelector className="ml-1 lg:ml-2" />
@@ -183,9 +200,8 @@ export default function Navbar({ onOpenSearch, onOpenWhereToBuy }: NavbarProps) 
               {t.nav.whereToBuy}
             </button>
             <a
-              href="https://shop.tillamook.com"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="#/shop"
+              onClick={() => setMobileMenuOpen(false)}
               className="inline-flex items-center gap-1.5 py-1 text-white hover:text-[#fcfae6]"
             >
               <span>{t.nav.onlineShop}</span>

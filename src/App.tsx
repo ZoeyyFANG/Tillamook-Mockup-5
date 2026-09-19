@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Navbar from './components/Navbar';
 import Subnav from './components/Subnav';
 import Hero from './components/Hero';
@@ -15,7 +15,15 @@ import Footer from './components/Footer';
 import SignMeUpModal from './components/SignMeUpModal';
 import WhereToBuyModal from './components/WhereToBuyModal';
 import SearchModal from './components/SearchModal';
-import { LanguageProvider } from './context/LanguageContext';
+import { LanguageProvider, useLanguage } from './context/LanguageContext';
+import { ShopProvider } from './shop/ShopContext';
+import { useRoute } from './shop/useRoute';
+import ShopPage from './shop/ShopPage';
+import CartPage from './shop/CartPage';
+import CheckoutPage from './shop/CheckoutPage';
+import ConfirmPage from './shop/ConfirmPage';
+import NotesOverlay from './shop/Notes';
+import { ShopLegal, CookieBanner, Toast } from './shop/ShopChrome';
 
 function TillamookAppContent() {
   const [currentCategory, setCurrentCategory] = useState('cheese');
@@ -26,6 +34,23 @@ function TillamookAppContent() {
   const [isWhereToBuyOpen, setIsWhereToBuyOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [selectedProductForStoreLocator, setSelectedProductForStoreLocator] = useState<string | undefined>();
+
+  const route = useRoute();
+  const { language, setLanguage } = useLanguage();
+  const prevRoute = useRef(route);
+
+  // The shop, cart and checkout are built for the Polish market: switch to Polish when entering them.
+  useEffect(() => {
+    if (route !== 'home' && prevRoute.current === 'home' && language !== 'pl') setLanguage('pl');
+    prevRoute.current = route;
+    window.scrollTo(0, 0);
+    // returning to a home anchor (e.g. #heritage) from the shop
+    if (route === 'home') {
+      const id = window.location.hash.replace('#', '');
+      if (id) window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }), 50);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route]);
 
   const handleOpenWhereToBuy = (productName?: string) => {
     setSelectedProductForStoreLocator(productName);
@@ -50,20 +75,23 @@ function TillamookAppContent() {
     }
   };
 
+  const checkoutFlow = route === 'checkout' || route === 'confirm';
+  const inShop = route === 'shop' || route === 'cart';
+
   return (
     <div className="min-h-screen bg-[#fcfae6] flex flex-col font-['GT_Walsheim_Pro',_'GT_Walsheim',_sans-serif] selection:bg-[#001e60] selection:text-white text-[#001e60]">
       {/* 1. Main Navigation Bar (#001e60) with Integrated Language Selector */}
-      <Navbar
+      {!checkoutFlow && <Navbar
         onOpenSearch={() => setIsSearchOpen(true)}
         onOpenWhereToBuy={() => handleOpenWhereToBuy()}
         onSelectCategory={(cat) => {
           setSelectedProductFilter(cat);
           handleScrollToProducts();
         }}
-      />
+      />}
 
       {/* 2. Sub-Navigation Bar ("Cheese ⌄") */}
-      <Subnav
+      {route === 'home' && <Subnav
         currentCategory={currentCategory}
         onCategoryChange={(cat) => {
           setCurrentCategory(cat);
@@ -74,10 +102,10 @@ function TillamookAppContent() {
           }
           handleScrollToProducts();
         }}
-      />
+      />}
 
       {/* 3. Hero Section (#fcfae6, Morning Star Weather Vane, "CHEESE FOR CHEESE LOVERS.", Product lineup photo, floating "SIGN ME UP" tab) */}
-      <main className="flex-1">
+      {route === 'home' && <main className="flex-1">
         <Hero
           onOpenSignMeUp={() => setIsSignMeUpOpen(true)}
         />
@@ -99,13 +127,25 @@ function TillamookAppContent() {
 
         {/* 6. Brand Heritage, Certified B Corp & Creamery Visit */}
         <BrandStory />
-      </main>
+      </main>}
+
+      {inShop && (
+        <main className="flex-1">
+          {route === 'shop' ? <ShopPage /> : <CartPage />}
+          <ShopLegal />
+        </main>
+      )}
+      {route === 'checkout' && <CheckoutPage />}
+      {route === 'confirm' && <ConfirmPage />}
+      {route !== 'home' && <NotesOverlay page={route} />}
+      {route === 'shop' && <CookieBanner />}
+      {inShop && <Toast />}
 
       {/* 7. Footer (#001e60) */}
-      <Footer
+      {!checkoutFlow && <Footer
         onOpenWhereToBuy={() => handleOpenWhereToBuy()}
         onOpenSignMeUp={() => setIsSignMeUpOpen(true)}
-      />
+      />}
 
       {/* Interactive Modals */}
       <SignMeUpModal
@@ -140,7 +180,9 @@ function TillamookAppContent() {
 export default function App() {
   return (
     <LanguageProvider>
-      <TillamookAppContent />
+      <ShopProvider>
+        <TillamookAppContent />
+      </ShopProvider>
     </LanguageProvider>
   );
 }
